@@ -1,3 +1,2 @@
-export 'widgets/styles.dart';
-export 'widgets/animations.dart';
-export 'widgets/transitions.dart';
+export 'widgets/extensions.dart';
+export 'widgets/fly_transition.dart';

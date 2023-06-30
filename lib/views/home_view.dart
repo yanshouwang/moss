@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 import 'package:flutter/material.dart';
-
-import '../models.dart';
-import '../view_models.dart';
-import '../views.dart';
-import '../widgets.dart';
+import 'package:moss/models.dart';
+import 'package:moss/styles.dart';
+import 'package:moss/view_models.dart';
+import 'package:moss/views.dart';
+import 'package:moss/widgets.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -19,8 +19,8 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   late final HomeViewModel viewModel;
   late final AnimationController xsToSController;
   late final AnimationController sToMController;
-  late final Animation<double> topAnimation;
-  late final Animation<double> bottomLeftAnimation;
+  late final Animation<double> topSettingsAnimation;
+  late final Animation<double> bottomSettingsAnimation;
   late final Animation<double> topWriteAnimation;
   late final Animation<double> bottomWriteAnimation;
 
@@ -39,14 +39,14 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 1000),
       reverseDuration: const Duration(milliseconds: 1250),
     );
-    topAnimation = CurvedAnimation(
+    topSettingsAnimation = CurvedAnimation(
       parent: xsToSController,
       // 0ms -> 400ms
       curve: const Interval(0 / 5, 2 / 5),
       // 0ms -> 750ms
       reverseCurve: const Interval(0 / 5, 3 / 5),
     );
-    bottomLeftAnimation = CurvedAnimation(
+    bottomSettingsAnimation = CurvedAnimation(
       parent: xsToSController,
       // 400ms -> 1000ms
       curve: const Interval(2 / 5, 5 / 5),
@@ -110,42 +110,58 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        margin: const EdgeInsets.all(spacing),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            buildTopView(context),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  buildBottomLeftView(context),
-                  Expanded(
-                    child: buildBottomRightView(context),
-                  ),
-                ],
-              ),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          buildLeftSettingsView(context),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                buildTopSettingsView(context),
+                Expanded(
+                  child: buildLogsView(context),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(width: kViewSpacing),
+                    Expanded(
+                      child: buildWriteValueView(),
+                    ),
+                    buildTopWriteControllerView(context),
+                  ],
+                ),
+                buildBottomWriteControllerView(context),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget buildTopView(BuildContext context) {
+  Widget buildTopSettingsView(BuildContext context) {
     final theme = Theme.of(context);
-    return TopTransition(
-      timeline: topAnimation,
+    final isLTR = Directionality.of(context).isLTR;
+    return FlyTransition(
+      animation: topSettingsAnimation,
+      axis: Axis.vertical,
+      isMinimumSide: true,
+      isHideToVisible: false,
       child: Container(
-        margin: const EdgeInsets.only(bottom: spacing),
+        margin: const EdgeInsets.only(
+          left: kViewSpacing,
+          top: kViewSpacing,
+          right: kViewSpacing,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: buildCommunicationTypeView(context),
             ),
-            const SizedBox(width: spacing),
+            const SizedBox(width: kViewSpacing),
             Row(
               children: [
                 ValueListenableBuilder<CommunicationState>(
@@ -161,10 +177,10 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         }
                       },
                       style: FilledButton.styleFrom(
-                        shape: const RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.horizontal(
-                            left: Radius.circular(16.0),
-                            right: Radius.circular(4.0),
+                            left: Radius.circular(isLTR ? 16.0 : 4.0),
+                            right: Radius.circular(isLTR ? 4.0 : 16.0),
                           ),
                         ),
                         backgroundColor: isConnected
@@ -186,10 +202,10 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                 FilledButton(
                   onPressed: () {},
                   style: FilledButton.styleFrom(
-                    shape: const RoundedRectangleBorder(
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.horizontal(
-                        left: Radius.circular(4.0),
-                        right: Radius.circular(16.0),
+                        left: Radius.circular(isLTR ? 4.0 : 16.0),
+                        right: Radius.circular(isLTR ? 16.0 : 4.0),
                       ),
                     ),
                     backgroundColor: theme.colorScheme.surfaceVariant,
@@ -205,21 +221,27 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     );
   }
 
-  Widget buildBottomLeftView(BuildContext context) {
+  Widget buildLeftSettingsView(BuildContext context) {
     final theme = Theme.of(context);
-    final direction = Directionality.of(context);
-    return BottomLeftTransition(
-      timeline: bottomLeftAnimation,
+    final isLTR = Directionality.of(context).isLTR;
+    return FlyTransition(
+      animation: bottomSettingsAnimation,
+      axis: Axis.horizontal,
+      isMinimumSide: true,
+      isHideToVisible: true,
       child: Container(
-        margin: direction == TextDirection.ltr
-            ? const EdgeInsets.only(right: spacing)
-            : const EdgeInsets.only(left: spacing),
+        margin: EdgeInsets.only(
+          left: isLTR ? kViewSpacing : 0.0,
+          top: kViewSpacing,
+          right: isLTR ? 0.0 : kViewSpacing,
+          bottom: kViewSpacing,
+        ),
         width: 200.0,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             buildCommunicationTypeView(context),
-            const SizedBox(height: spacing),
+            const SizedBox(height: kViewSpacing),
             buildCommunicationSettingsView(context),
             const Spacer(),
             ValueListenableBuilder(
@@ -247,18 +269,6 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           ],
         ),
       ),
-    );
-  }
-
-  Widget buildBottomRightView(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: buildLogsView(context),
-        ),
-        buildWirteView(context),
-      ],
     );
   }
 
@@ -301,61 +311,78 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   }
 
   Widget buildLogsView(BuildContext context) {
-    return InputDecorator(
-      decoration: InputDecoration(
-        labelText: '日志',
+    return Container(
+      // NOTE: 左右边距不对称时不要使用 margin 或 padding 属性来实现，避免 RTL 布局问题
+      margin: const EdgeInsets.only(
+        left: kViewSpacing,
+        top: kViewSpacing,
+        right: kViewSpacing,
       ),
-      child: ValueListenableBuilder<List<String>>(
-        valueListenable: viewModel.receivedMessages,
-        builder: (context, notifiedMessages, child) {
-          return ListView.builder(
-            itemBuilder: (context, i) {
-              final message = notifiedMessages[i];
-              return Text(message);
-            },
-            itemCount: notifiedMessages.length,
-          );
-        },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: '日志',
+        ),
+        child: ValueListenableBuilder<List<String>>(
+          valueListenable: viewModel.receivedMessages,
+          builder: (context, notifiedMessages, child) {
+            return ListView.builder(
+              itemBuilder: (context, i) {
+                final message = notifiedMessages[i];
+                return Text(message);
+              },
+              itemCount: notifiedMessages.length,
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget buildWirteView(BuildContext context) {
-    final direction = Directionality.of(context);
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: TextField(
-                // controller: writeMessageController,
-                decoration: InputDecoration(
-                  // border: OutlineInputBorder(),
-                  labelText: '输入指令',
-                ),
-              ),
-            ),
-            TopWriteTransition(
-              animation: topWriteAnimation,
-              child: Container(
-                margin: direction == TextDirection.ltr
-                    ? const EdgeInsets.only(top: spacing, left: spacing)
-                    : const EdgeInsets.only(top: spacing, right: spacing),
-                width: 400.0,
-                child: buildWriteControllerView(context),
-              ),
-            ),
-          ],
+  Widget buildWriteValueView() {
+    return Container(
+      margin: const EdgeInsets.only(
+        top: kViewSpacing,
+      ),
+      child: TextField(
+        // controller: writeMessageController,
+        decoration: InputDecoration(
+          // border: OutlineInputBorder(),
+          labelText: '输入指令',
         ),
-        BottomWriteTransition(
-          animation: bottomWriteAnimation,
-          child: Container(
-            margin: const EdgeInsets.only(top: spacing),
-            child: buildWriteControllerView(context),
-          ),
+      ),
+    );
+  }
+
+  Widget buildTopWriteControllerView(BuildContext context) {
+    return FlyTransition(
+      animation: topWriteAnimation,
+      axis: Axis.horizontal,
+      isMinimumSide: false,
+      isHideToVisible: true,
+      stickySize: kViewSpacing,
+      child: Container(
+        margin: const EdgeInsets.only(
+          left: kViewSpacing,
+          top: kViewSpacing,
+          right: kViewSpacing,
         ),
-      ],
+        width: 400.0,
+        child: buildWriteControllerView(context),
+      ),
+    );
+  }
+
+  Widget buildBottomWriteControllerView(BuildContext context) {
+    return FlyTransition(
+      animation: bottomWriteAnimation,
+      axis: Axis.vertical,
+      isMinimumSide: false,
+      isHideToVisible: false,
+      stickySize: kViewSpacing,
+      child: Container(
+        margin: const EdgeInsets.all(kViewSpacing),
+        child: buildWriteControllerView(context),
+      ),
     );
   }
 
@@ -396,7 +423,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             },
           ),
         ),
-        const SizedBox(width: spacing),
+        const SizedBox(width: kViewSpacing),
         Expanded(
           child: ValueListenableBuilder<EndSymbol>(
             valueListenable: viewModel.endSymbol,
@@ -417,7 +444,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             },
           ),
         ),
-        const SizedBox(width: spacing),
+        const SizedBox(width: kViewSpacing),
         FilledButton(
           onPressed: () {
             // final message = writeMessageController.text;

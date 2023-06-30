@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-
-import '../models.dart';
+import 'package:moss/models.dart';
 
 abstract class UdpSettingsViewModel {
   ValueListenable<String> get remoteHost;

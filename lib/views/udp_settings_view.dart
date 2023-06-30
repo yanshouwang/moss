@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../view_models.dart';
-import '../widgets.dart';
+import 'package:moss/styles.dart';
+import 'package:moss/view_models.dart';
 
 class UdpSettingsView extends StatefulWidget {
   const UdpSettingsView({super.key});
@@ -25,7 +24,7 @@ class _UdpSettingsViewState extends State<UdpSettingsView> {
       child: Column(
         children: [
           Container(
-            margin: const EdgeInsets.only(bottom: spacing),
+            margin: const EdgeInsets.only(bottom: kViewSpacing),
             child: ValueListenableBuilder<String>(
               valueListenable: viewModel.remoteHost,
               builder: (context, remoteHost, child) {
@@ -40,7 +39,7 @@ class _UdpSettingsViewState extends State<UdpSettingsView> {
             ),
           ),
           Container(
-            margin: const EdgeInsets.only(bottom: spacing),
+            margin: const EdgeInsets.only(bottom: kViewSpacing),
             child: ValueListenableBuilder<int>(
               valueListenable: viewModel.remotePort,
               builder: (context, remotePort, child) {

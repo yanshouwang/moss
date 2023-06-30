@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-
-import '../models.dart';
+import 'package:moss/models.dart';
 
 abstract class HomeViewModel {
   List<CommunicationType> get communicationTypes;
